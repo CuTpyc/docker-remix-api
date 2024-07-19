@@ -1,27 +1,18 @@
 import type { FunctionComponent } from "react";
 import { json } from "@remix-run/node";
-import { Form, useLoaderData, useFetcher, NavLink, Outlet } from "@remix-run/react";
+import { Form, useLoaderData, useFetcher } from "@remix-run/react";
 import { getContact, updateContact } from "../data";
 import type { ContactRecord } from "../data";
-import { getPost } from "~/posts";
-import { PostsRecord } from "~/posts";
-import type { LoaderFunctionArgs, ActionFunctionArgs, LinksFunction } from "@remix-run/node";
+import type { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
 import invariant from "tiny-invariant";
-import appStylesHref from "./app.css?url";
-
-export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: appStylesHref },
-];
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   invariant(params.contactId, "Missing contactId param");
-  invariant(params.contactId, "Missing userID param");
   const contact = await getContact(params.contactId);
-  const post = await getPost(params.contactId)
   if (!contact) {
     throw new Response("Not Found", { status: 404 });
   }
-  return json({ contact, post });
+  return json({ contact });
 };
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
@@ -33,15 +24,9 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 };
 
 export default function Contact() {
-  const { contact, post } = useLoaderData<typeof loader>();
+  const { contact } = useLoaderData<typeof loader>();
 
   return (
-    <NavLink
-                      className={({ isActive, isPending }) =>
-                        isActive ? "active" : isPending ? "pending" : ""
-                      }
-                      to={post.id}
-                    >
     <div id="contact">
       <div>
         <img
@@ -50,11 +35,12 @@ export default function Contact() {
           src={contact.image}
         />
       </div>
+
       <div>
         <h1>
           {contact.firstName || contact.lastName ? (
             <>
-              {contact.firstName} {contact.lastName}
+              {contact.firstName} SOME TEXT THET I WANT {contact.lastName}
             </>
           ) : (
             <i>No Name</i>
@@ -92,14 +78,8 @@ export default function Contact() {
             <button type="submit">Delete</button>
           </Form>
         </div>
-        <div id="post-title">{post.title}</div>
       </div>
-      
     </div>
-    
-    <Outlet />
-    </NavLink>
-    
   );
 }
 

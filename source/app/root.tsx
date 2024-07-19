@@ -15,6 +15,7 @@ import {
 import appStylesHref from "./app.css?url";
 import { createEmptyContact, getContacts } from "./data";
 import { useEffect } from "react";
+import { getPosts } from "./posts";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: appStylesHref },
@@ -24,7 +25,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const q = url.searchParams.get("q");
   const contacts = await getContacts(q);
-  return json({ contacts, q });
+  const posts = await getPosts(q);
+  return json({ contacts, q, posts });
 };
 
 export const action = async () => {
@@ -40,7 +42,9 @@ export const action = async () => {
 };
 
 export default function App() {
-  const { contacts, q } = useLoaderData<typeof loader>();
+  const { contacts, q, posts } = useLoaderData<typeof loader>();
+  console.log(contacts)
+  console.log(posts)
   const navigation = useNavigation();
   const submit = useSubmit();
   const searching =
